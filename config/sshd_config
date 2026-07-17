@@ -1,0 +1,14 @@
+# Secure Shell Daemon Hardening Configuration
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding no
+MaxAuthTries 3
+ClientAliveInterval 300
+ClientAliveCountMax 2
+AllowUsers secadmin
+
+# Restrict remote access to your dedicated non-root admin user
+AllowUsers <YOUR_ADMIN_USER>
