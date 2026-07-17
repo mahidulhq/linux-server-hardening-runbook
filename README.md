@@ -45,7 +45,7 @@ This project focuses on:
 1. Read [Project Overview]( 00-project-overview.md)
 2. Follow the guides in order (`00` → `13`)
 3. Execute commands carefully and test access after each critical change
-4. Complete [Validation & Security Checklist]( 11-validation-and-security-checklist.md)
+4. Complete [Validation & Security Checklist]( validation-and-security-checklist.md)
 
 ---
 
