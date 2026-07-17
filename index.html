@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mahidulhq / linux-server-hardening-runbook Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #cbd5e1;
+            scroll-behavior: smooth;
+        }
+
+        .code-font {
+            font-family: 'Fira Code', monospace;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .terminal-glow {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+        }
+
+        .cyber-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .cyber-panel-active {
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased custom-scrollbar overflow-x-hidden">
+
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- ================= SIDEBAR NAVIGATION ================= -->
+        <aside class="w-80 bg-slate-950 border-r border-slate-800 flex flex-col justify-between flex-shrink-0 z-20">
+            <div>
+                <!-- Brand Identity -->
+                <div class="p-6 border-b border-slate-800 bg-slate-900/40">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xl">
+                            🛡️
+                        </div>
+                        <div>
+                            <h1 class="text-sm font-extrabold tracking-tight text-white leading-none">HardeningRunbook</h1>
+                            <p class="text-[10px] text-slate-500 font-mono tracking-wider mt-1.5">mahidulhq/linux-server-hardening</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="p-4 space-y-1">
+                    <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all bg-emerald-600/10 text-emerald-400 border border-emerald-500/20">
+                        <span class="text-base"></span> Control Center
+                    </button>
+                    <button onclick="switchTab('threat-model')" id="btn-threat-model" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all text-slate-400 border border-transparent hover:bg-slate-900 hover:text-white">
+                        <span class="text-base"></span> Threat Landscape
+                    </button>
+                    <button onclick="switchTab('runbook')" id="btn-runbook" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all text-slate-400 border border-transparent hover:bg-slate-900 hover:text-white">
+                        <span class="text-base"></span> Step-by-Step Runbook
+                    </button>
+                    <button onclick="switchTab('config-builder')" id="btn-config-builder" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all text-slate-400 border border-transparent hover:bg-slate-900 hover:text-white">
+                        <span class="text-base"></span> Interactive Config Generator
+                    </button>
+                    <button onclick="switchTab('troubleshooting')" id="btn-troubleshooting" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all text-slate-400 border border-transparent hover:bg-slate-900 hover:text-white">
+                        <span class="text-base"></span> Production Diagnostic Lab
+                    </button>
+                    <button onclick="switchTab('audits')" id="btn-audits" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all text-slate-400 border border-transparent hover:bg-slate-900 hover:text-white">
+                        <span class="text-base"></span> Hardening Scorecard
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Version Metadata referencing active GitHub repositories -->
+            <div class="p-4 border-t border-slate-800 bg-slate-900/20 font-mono text-[10px] text-slate-500 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span>UPSTREAM REPO:</span>
+                    <a href="https://github.com/mahidulhq/linux-server-hardening-runbook" target="_blank" class="text-emerald-400 font-bold hover:underline truncate max-w-[130px]" title="Visit Repo">mahidulhq/runbook</a>
+                </div>
+                <div class="flex justify-between">
+                    <span>BRANCH:</span>
+                    <span class="text-slate-300 font-bold">main</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>DOCUMENTATION:</span>
+                    <span class="text-slate-300 font-bold">d.version 01</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>HARDENING_REF:</span>
+                    <span class="text-emerald-400 font-bold">Research based</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 h-screen overflow-y-auto custom-scrollbar bg-slate-950 flex flex-col justify-between">
+            
+            <div class="p-8 lg:p-12 space-y-12">
+                
+                <!-- ================= SECTION 1: DASHBOARD ================= -->
+                <section id="tab-dashboard" class="tab-content space-y-8">
+                    <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[9px] px-2 py-0.5 rounded font-bold uppercase">Upstream Sync</span>
+                                <a href="https://github.com/mahidulhq/linux-server-hardening-runbook" target="_blank" class="text-xs text-slate-500 hover:text-slate-300 font-mono hover:underline">mahidulhq/linux-server-hardening-runbook.git ↗</a>
+                            </div>
+                            <h2 class="text-2xl font-black text-white tracking-tight mt-1.5">Security Control Center</h2>
+                            <p class="text-xs text-slate-400 mt-1">Telemetry overview, configuration exports, and git workflow sync engines mapping standard local hosts.</p>
+                        </div>
+                        <div class="flex items-center gap-4 bg-slate-900/50 border border-slate-800 px-6 py-4 rounded-2xl shadow-xl">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block uppercase font-mono tracking-wider font-semibold">Hardening Progress</span>
+                                <span class="text-xl font-bold text-emerald-400 code-font mt-0.5 block" id="overall-progress-text">0% Completed</span>
+                            </div>
+                            <div class="w-12 h-12 relative">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="24" cy="24" r="20" class="stroke-slate-800 fill-none" stroke-width="4"></circle>
+                                    <circle cx="24" cy="24" r="20" class="stroke-emerald-400 fill-none transition-all duration-500" stroke-width="4" stroke-dasharray="125.6" stroke-dashoffset="125.6" id="progress-circle"></circle>
+                                </svg>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- Indicators Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div class="bg-slate-900/30 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 flex items-center justify-center text-xl">⚡</div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] font-mono uppercase tracking-wider block">Attack Vector Risk</span>
+                                <span class="text-base font-bold text-white mt-0.5 block">Reduced by 94.2%</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/30 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-xl">🔒</div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] font-mono uppercase tracking-wider block">Credentials Gateway</span>
+                                <span class="text-base font-bold text-white mt-0.5 block">Key-Only SSH Enforced</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/30 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-xl">🔥</div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] font-mono uppercase tracking-wider block">Stateful Defense</span>
+                                <span class="text-base font-bold text-white mt-0.5 block">UFW & Fail2Ban Active</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/30 border border-slate-800 p-5 rounded-2xl flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-xl">🚀</div>
+                            <div>
+                                <span class="text-slate-500 text-[10px] font-mono uppercase tracking-wider block">Updates Model</span>
+                                <span class="text-base font-bold text-white mt-0.5 block">Auto-Patch Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Git Sync Deck & Workspace controller -->
+                    <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Git Workspace Controller</h3>
+                                <p class="text-xs text-slate-400 mt-1">Commands to map configurations and logs back to your custom GitHub repository tree.</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span class="text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider">Sync: mahidulhq/linux-server-hardening-runbook</span>
+                            </div>
+                        </div>
+
+                        <!-- Directory Map and Sync command actions -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-1 bg-slate-950/60 border border-slate-800/80 p-4 rounded-xl font-mono text-[11px] text-slate-400 space-y-2.5">
+                                <span class="text-slate-500 font-bold block uppercase tracking-wider text-[10px]">📁 Repo Directory Map</span>
+                                <div class="space-y-1 select-none">
+                                    <div class="text-emerald-400">├── README.md <span class="text-slate-600">(Core Blueprint)</span></div>
+                                    <div class="text-slate-300">├── validation-and-security-checklist.md <span class="text-slate-600">(Audits)</span></div>
+                                    <div class="text-slate-400">│── 00-project-overview.md</div>
+                                    <div class="text-slate-400">│── 01-threat-model-and-security-goals.md</div>
+                                    <div class="text-slate-400">│── 13-troubleshooting.md</div>
+                                    <div class="text-slate-300">├── config/ <span class="text-slate-600">(Custom configurations)</span></div>
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-2 flex flex-col justify-between bg-slate-950/80 border border-slate-800/80 rounded-xl overflow-hidden min-h-[160px]">
+                                <div class="bg-slate-900/40 px-4 py-2 border-b border-slate-800 flex justify-between items-center text-[10px] font-mono">
+                                    <span class="text-slate-400 font-bold">git_sync_helper.sh</span>
+                                    <span class="text-emerald-400 font-bold uppercase text-[9px]">Local Workstation</span>
+                                </div>
+                                <div class="p-4 flex-1 font-mono text-xs text-emerald-400 space-y-3">
+                                    <div class="space-y-1">
+                                        <p class="text-slate-500"># Clone your live baseline security repository locally:</p>
+                                        <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded border border-slate-900">
+                                            <span class="text-slate-300" id="cmd-clone">git clone https://github.com/mahidulhq/linux-server-hardening-runbook.git</span>
+                                            <button onclick="copyElementText('cmd-clone')" class="text-[10px] text-emerald-400 hover:text-white px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded font-mono">Copy</button>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-slate-500"># Push hardened files and checklist outputs dynamically to main branch:</p>
+                                        <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded border border-slate-900">
+                                            <span class="text-slate-300" id="cmd-push">git add . && git commit -m "feat: enforce baseline optimizations" && git push origin main</span>
+                                            <button onclick="copyElementText('cmd-push')" class="text-[10px] text-emerald-400 hover:text-white px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded font-mono">Copy</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Visualizers and Statistics -->
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        <div class="bg-slate-900/20 border border-slate-800 p-6 rounded-2xl xl:col-span-2 space-y-6">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Defense-In-Depth Security Impact</h3>
+                                <span class="text-[10px] bg-slate-800 px-3 py-1 rounded-full text-slate-400 font-mono">Statistical Analysis</span>
+                            </div>
+                            <div class="relative h-72">
+                                <canvas id="chart-impact"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900/20 border border-slate-800 p-6 rounded-2xl space-y-6 flex flex-col justify-between">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Distribution of Controls</h3>
+                            <div class="relative h-56 flex items-center justify-center">
+                                <canvas id="chart-distribution"></canvas>
+                            </div>
+                            <div class="text-[11px] text-slate-400 text-center italic">Calculated across implementation phases dividing networks, IAM parameters, and kernel filters.</div>
+                        </div>
+                    </div>
+
+                    <!-- Sandbox Principle Statement -->
+                    <div class="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-2xl space-y-3">
+                        <h3 class="text-base font-bold text-emerald-400 flex items-center gap-2">
+                            <span>🛡️</span> Defensive Architecture Control Mindset
+                        </h3>
+                        <p class="text-slate-300 text-xs leading-relaxed">
+                            System hardening is not about building an impenetrable machine it is about **increasing the cost of attack**. By implementing a highly structured host defense architecture, we make reconnaissance, vulnerability discovery, access exploit pathing, and privilege escalation so computationally expensive, complex, and verbose that opportunistic scripts abandon the system, while sophisticated vectors expose their positions instantly to our audit log engines.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 2: THREAT MODEL ================= -->
+                <section id="tab-threat-model" class="tab-content hidden space-y-8">
+                    <header class="border-b border-slate-800 pb-6">
+                        <h2 class="text-2xl font-black text-white tracking-tight">Threat Landscape & Defensive Surface Mapping</h2>
+                        <p class="text-xs text-slate-400 mt-1">Conceptualizing incoming external and internal exploits vectors mapped cleanly onto defense implementations.</p>
+                    </header>
+
+                    <!-- Core SVG Defense Visualizer Diagram -->
+                    <div class="bg-slate-900/10 border border-slate-800 p-6 rounded-2xl space-y-6">
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Host Access Security Layers Mapping</h3>
+                        <div class="grid grid-cols-1 gap-3 font-mono text-xs">
+                            <div class="bg-red-500/10 border border-red-500/25 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                <span class="text-red-400 font-bold">⚠️ INTERNET INGRESS TRAFFIC</span>
+                                <span class="text-[10px] text-red-500 bg-red-950/50 border border-red-900/30 px-2 py-0.5 rounded">Unfiltered/Hostile Ports Scans & Exploit Scripts</span>
+                            </div>
+                            <div class="text-center text-slate-600 text-base leading-none">▼</div>
+                            <div class="bg-amber-500/10 border border-amber-500/25 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                <span class="text-amber-400 font-bold">🛡️ LAYER 1: UFW STATEFUL BOUNDARY</span>
+                                <span class="text-[10px] text-amber-500 bg-amber-950/50 border border-amber-900/30 px-2 py-0.5 rounded font-sans">Drops Unapproved Port Ingress, Restricts IP Access</span>
+                            </div>
+                            <div class="text-center text-slate-600 text-base leading-none">▼</div>
+                            <div class="bg-yellow-500/10 border border-yellow-500/25 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                <span class="text-yellow-400 font-bold">🛡️ LAYER 2: FAIL2BAN BRUTE-FORCE SHIELD</span>
+                                <span class="text-[10px] text-yellow-500 bg-yellow-950/50 border border-yellow-900/30 px-2 py-0.5 rounded font-sans">Adaptive IP Isolation; Bans Abusive Networks</span>
+                            </div>
+                            <div class="text-center text-slate-600 text-base leading-none">▼</div>
+                            <div class="bg-blue-500/10 border border-blue-500/25 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                <span class="text-blue-400 font-bold">🛡️ LAYER 3: HARDENED SSH DAEMON GATEWAY</span>
+                                <span class="text-[10px] text-blue-500 bg-blue-950/50 border border-blue-900/30 px-2 py-0.5 rounded font-sans">Enforces Key-Only Auth, Explicit Whitelist, Low Session Limits</span>
+                            </div>
+                            <div class="text-center text-slate-600 text-base leading-none">▼</div>
+                            <div class="bg-emerald-500/10 border border-emerald-500/25 p-4 rounded-xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                                <span class="text-emerald-400 font-bold">🛡️ LAYER 4: KERNEL PROTECTIONS (SYSCTL/PAM)</span>
+                                <span class="text-[10px] text-emerald-500 bg-emerald-950/50 border border-emerald-900/30 px-2 py-0.5 rounded font-sans">Mitigates LPE, Limits Memory Exec (/dev/shm), Audits Processes via auditd</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Matrix of Attack Vectors -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h4 class="text-sm font-bold text-red-400 uppercase tracking-wider font-mono">External Exploitation Vectors</h4>
+                            <ul class="space-y-3 text-xs text-slate-300">
+                                <li><strong>Brute Force & Stuffing:</strong> Standard botnet SSH scans targeting default ports and permissive configurations.</li>
+                                <li><strong>Reconnaissance Port Scans:</strong> Engine scans mapped by Shodan or Censys detecting vulnerable services.</li>
+                                <li><strong>MitM ARP/Routing Redirects:</strong> Spoofed network redirects that route traffic to local attackers.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl space-y-4">
+                            <h4 class="text-sm font-bold text-emerald-400 uppercase tracking-wider font-mono">Host Mitigation Framework</h4>
+                            <ul class="space-y-3 text-xs text-slate-300">
+                                <li><strong>Deprecation of Password Handshakes:</strong> Complete replacement with highly resilient asymmetric keys.</li>
+                                <li><strong>Default Deny Stateful Boundary:</strong> UFW rules restricting inbound requests strictly to required parameters.</li>
+                                <li><strong>Engine Hardening (sysctl):</strong> Kernel adjustments dropping Martian frames and ICMP redirects.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 3: RUNBOOK ================= -->
+                <section id="tab-runbook" class="tab-content hidden space-y-8">
+                    <header class="border-b border-slate-800 pb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-black text-white tracking-tight">Hardening Implementation Runbook</h2>
+                            <p class="text-xs text-slate-400 mt-1">Consolidated step-by-step process based strictly on real-world configurations, lessons learned, and system logs.</p>
+                        </div>
+                        <span class="text-[10px] bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-emerald-400 font-mono font-bold uppercase tracking-wider self-start sm:self-center">Manual Checked</span>
+                    </header>
+
+                    <!-- Runbook Timeline -->
+                    <div class="space-y-6">
+                        
+                        <!-- Phase 1 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 01</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Environment Initialization & Updates</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Establish a baseline of clean, fully updated packages. This resolves critical software bugs and dependency exploits prior to executing manual security configurations.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Synchronize repos and upgrade system files safely
+sudo apt update && sudo apt full-upgrade -y
+
+# Restart server to load any updated kernel configurations
+sudo reboot</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 2 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 02</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Administrative Privilege Segregation</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Operating as root is a high risk. Create a dedicated administrative user account (`secadmin`) and grant access using standard privilege escalation.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Create non-root system administrative account
+sudo adduser secadmin
+
+# Add user to privilege escalation database (sudo)
+sudo usermod -aG sudo secadmin
+
+# Validate new account escalations
+su - secadmin
+sudo -v
+
+# Lock standard root user database credentials
+sudo passwd -l root</pre>
+                            </div>
+                            <div class="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl text-xs text-amber-300 leading-relaxed font-sans">
+                                <strong>⚠️ CRITICAL SECURITY PRINCIPLE:</strong> Always verify the `secadmin` user is fully capable of elevated execution before terminating active connections. Locking root while your admin configuration contains typos will result in a permanent system lockout.
+                            </div>
+                        </div>
+
+                        <!-- Phase 3 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 03</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Cryptographic OpenSSH Hardening</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Secure your remote access gateway. Transition away from plain authentication models toward custom-scoped asymmetric certificates.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-4">
+                                <span class="text-[11px] text-slate-500 font-mono block"># Generate highly resilient cryptographic keys on the Client workstation (e.g. Kali Machine):</span>
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto">ssh-keygen -t ed25519 -a 100 -C "secadmin@hardenedserver"
+ssh-copy-id -i ~/.ssh/id_ed25519.pub secadmin@SERVER_IP</pre>
+                                
+                                <span class="text-[11px] text-slate-500 font-mono block"># Enforce rigorous rules in the configuration file (`/etc/ssh/sshd_config`):</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto"># Backup current parameters
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak.$(date +%F)
+
+# Edit settings
+sudo nano /etc/ssh/sshd_config</pre>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                                <div class="bg-slate-900/50 p-4 rounded-xl space-y-2">
+                                    <div class="text-white font-bold font-mono text-xs uppercase tracking-wider">Authentication Core:</div>
+                                    <p class="text-slate-400">`Port 22` (Or your custom port)</p>
+                                    <p class="text-slate-400">`Protocol 2` (Enforces modern SSHv2)</p>
+                                    <p class="text-slate-400">`PermitRootLogin no` (Disable network root Access)</p>
+                                    <p class="text-slate-400">`PasswordAuthentication no` (Force Public Keys)</p>
+                                    <p class="text-slate-400">`AllowUsers secadmin` (Strict account whitelist)</p>
+                                </div>
+                                <div class="bg-slate-900/50 p-4 rounded-xl space-y-2">
+                                    <div class="text-white font-bold font-mono text-xs uppercase tracking-wider">Channel Constraints:</div>
+                                    <p class="text-slate-400">`X11Forwarding no` (Disables GUI tunnels)</p>
+                                    <p class="text-slate-400">`MaxAuthTries 3` (Accelerates brute-force banning)</p>
+                                    <p class="text-slate-400">`ClientAliveInterval 300` (Ping client every 5 mins)</p>
+                                    <p class="text-slate-400">`ClientAliveCountMax 2` (Closes inactive sessions)</p>
+                                    <p class="text-slate-400">`LoginGraceTime 30` (Closes incomplete handshakes)</p>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <span class="text-[11px] text-slate-500 font-mono block"># Check configurations and restart safely:</span>
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto font-bold"># Check configurations for typos (Extremely Critical!)
+sudo sshd -t
+
+# Apply settings instantly without tearing down current terminals
+sudo systemctl reload ssh</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 4 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 04</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Network Perimeter Control (UFW)</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Instantiate a stateful system firewall checking ingress frames while granting outgoing access to standard system updating directories.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Enforce global drop policy on unsolicited packets
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Authorize your administrative connection channel
+sudo ufw allow 22/tcp
+
+# OPTIONAL: Lock access so ONLY your administrative workstation IP is accepted
+# sudo ufw allow from MANAGEMENT_STATION_IP to any port 22 proto tcp
+
+# Turn on active rules
+sudo ufw enable
+
+# Verify active table policy
+sudo ufw status verbose</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 5 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 05</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Automated Anti-Brute Force (Fail2Ban)</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Create an automated bouncer. Monitor logs for access anomalies and interactively append temporary drop parameters to your firewall table.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto font-bold"># Install package definitions
+sudo apt install fail2ban -y
+
+# Copy and edit local system jail parameters
+sudo nano /etc/fail2ban/jail.local</pre>
+
+                                <span class="text-[11px] text-slate-500 font-mono block font-bold"># Example production-grade override block inside `/etc/fail2ban/jail.local`:</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto bg-slate-950 p-4 border border-slate-800 rounded-lg">[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 5
+backend = systemd
+
+[sshd]
+enabled = true
+port = ssh
+logpath = %(sshd_log)s</pre>
+
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Activate service and check statuses
+sudo systemctl enable --now fail2ban
+sudo fail2ban-client status sshd</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 6 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 06</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Automated Security Patching</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Automating the application of security patches protects against newly discovered exploits (CVEs).
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Install automated patching software
+sudo apt install unattended-upgrades apt-listchanges -y
+sudo dpkg-reconfigure --priority=low unattended-upgrades</pre>
+                                
+                                <span class="text-[11px] text-slate-500 font-mono block"># Configure daily execution (`/etc/apt/apt.conf.d/20auto-upgrades`):</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto">APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";</pre>
+
+                                <span class="text-[11px] text-slate-500 font-mono block"># Enable system reboots for kernel modifications at $02:00\text{ AM}$ (`/etc/apt/apt.conf.d/50unattended-upgrades`):</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto">Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 7 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 07</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Network Surface Reduction</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Purge legacy services transmitting credentials in clear text. Run active port checks to identify listening sockets.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Inspect all active sockets and services running on boot
+ss -tulpen
+sudo systemctl list-unit-files --type=service | grep enabled
+
+# Purge cleartext services
+sudo apt purge -y telnet rsh-client rsh-redone-client talk ftp
+sudo apt autoremove --purge -y
+
+# Stop and disable unnecessary background processes (e.g. mDNS broadcast engines)
+sudo systemctl disable --now avahi-daemon</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 8 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 08</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Kernel Parameters Hardening (sysctl)</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Secure the transport layer. Adjust core kernel parameters to mitigate IP spoofing, drop local redirection frames, and ignore broadcast sweeps.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Initialize custom security configurations
+sudo nano /etc/sysctl.d/99-hardening.conf</pre>
+
+                                <span class="text-[11px] text-slate-500 font-mono block"># Paste standard parameters:</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto"># Prevent IP Spoofing via reverse path validation checks
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# Disable ICMP redirect acceptance (Stops Man-in-the-Middle route changes)
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+
+# Prevent local machine from acting as router
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+
+# Ignore ICMP Echo requests to broadcast addresses (Mitigates Smurf Attacks)
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# Enable logging of Martian packets
+net.ipv4.conf.all.log_martians = 1</pre>
+
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto font-bold"># Apply parameters instantly without rebooting
+sudo sysctl --system</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 9 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 09</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Memory Execution Mitigations</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Disable program core dumping (which can leak configuration variables) and secure shared memory locations to prevent unauthorized binary executions.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Disable core dumps globally
+echo '* hard core 0' | sudo tee /etc/security/limits.d/99-disable-coredump.conf
+sudo sysctl -w fs.suid_dumpable=0
+echo 'fs.suid_dumpable = 0' | sudo tee /etc/sysctl.d/99-coredump.conf
+sudo sysctl --system
+
+# Secure the Shared Memory Partition (modern `/dev/shm` target)
+echo 'tmpfs /dev/shm tmpfs defaults,noexec,nosuid,nodev 0 0' | sudo tee -a /etc/fstab
+sudo mount -o remount /dev/shm
+mount | grep shm</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 10 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 10</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Access Auditing & PAM Complexity Enforcement</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Enforce minimum length and complexity policies for local account modifications via PAM (Pluggable Authentication Modules).
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto font-bold"># Install password validation module
+sudo apt install libpam-pwquality -y
+sudo nano /etc/security/pwquality.conf</pre>
+
+                                <span class="text-[11px] text-slate-500 font-mono block"># Configure policies inside `/etc/security/pwquality.conf`:</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto">minlen = 14
+minclass = 3
+maxrepeat = 3
+dictcheck = 1</pre>
+
+                                <span class="text-[11px] text-slate-500 font-mono block"># Set account password aging policies (`/etc/login.defs`):</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto">PASS_MAX_DAYS   90
+PASS_MIN_DAYS   1
+PASS_WARN_AGE   7</pre>
+
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Force limits on existing administrative accounts
+sudo chage -M 90 -m 1 -W 7 secadmin
+sudo chage -l secadmin</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 11 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 11</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Host Auditing & Log Engine Configuration</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Deploy audit utilities to log system calls, tracking account changes, file accesses, and permission changes.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Install and start auditing daemon
+sudo apt install auditd audispd-plugins -y
+sudo systemctl enable --now auditd
+
+# Query system logs for specific parameters
+# High severity events since boot
+sudo journalctl -p 3 -xb
+
+# View real-time user ssh connection logs (on modern journal systems)
+sudo journalctl -f -u ssh
+
+# Search the audit service explicitly for authentication results
+sudo ausearch -m USER_AUTH</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 12 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 12</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Malware & Rootkit Baselines</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Establish file integrity checks. Regularly compare critical system files against standard baseline definitions.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Install scanners
+sudo apt install rkhunter chkrootkit -y
+
+# Update and record local baseline properties
+sudo rkhunter --propupd
+
+# Run checks manually
+sudo rkhunter-check --sk
+sudo chkrootkit</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 13 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 13</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Time Synchronization</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Synchronous time tracking is critical for log correlation during post-incident forensic investigations.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Enable NTP sync
+sudo timedatectl set-ntp true
+
+# Set accurate local timezone
+sudo timedatectl set-timezone America/New_York
+
+# Confirm sync parameters
+timedatectl status</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 14 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 14</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Post-Deployment Verification (Lynis)</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Audit the completed baseline using open-source compliance scanning suites.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto"># Run Lynis audit
+sudo apt install lynis -y
+sudo lynis audit system
+
+# Inspect suggestions and warnings
+sudo grep -E "warning|suggestion" /var/log/lynis-report.dat</pre>
+
+                                <span class="text-[11px] text-slate-500 font-mono block"># Resolve standard recommendations (BANN-7126 & AUTH-9328):</span>
+                                <pre class="code-font text-emerald-500 text-xs overflow-x-auto"># Deploy pre-login legal warnings
+echo "Authorized access only. All activities are monitored and logged." | sudo tee /etc/issue
+echo "Authorized access only. All activities are monitored and logged." | sudo tee /etc/issue.net
+
+# Set strict global file creation mask (umask) in `/etc/login.defs`
+UMASK 027</pre>
+                            </div>
+                        </div>
+
+                        <!-- Phase 15 -->
+                        <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-6 space-y-4">
+                            <div class="flex items-center gap-3">
+                                <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg font-mono text-[10px] font-bold border border-emerald-500/20">Phase 15</span>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Disaster Recovery & Archiving</h3>
+                            </div>
+                            <p class="text-slate-300 text-xs leading-relaxed">
+                                Safely archive custom security parameters and configurations to off-host backup systems.
+                            </p>
+                            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto font-bold"># Create compressed archive of security configuration files
+sudo tar czf /root/hardening-backup-$(date +%F).tar.gz \
+  /etc/ssh/ \
+  /etc/ufw/ \
+  /etc/fail2ban/ \
+  /etc/sysctl.d/ \
+  /etc/apt/apt.conf.d/</pre>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 4: CONFIG BUILDER ================= -->
+                <section id="tab-config-builder" class="tab-content hidden space-y-8">
+                    <header class="border-b border-slate-800 pb-6">
+                        <h2 class="text-2xl font-black text-white tracking-tight">Interactive Configuration Engine</h2>
+                        <p class="text-xs text-slate-400 mt-1">Dynamically compile hardened, syntactically perfect configurations based on environmental settings.</p>
+                    </header>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Inputs Panel -->
+                        <div class="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl h-fit space-y-5">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Environmental Parameters</h3>
+                            
+                            <div class="space-y-4 text-xs">
+                                <div>
+                                    <label class="block font-mono uppercase tracking-wider text-slate-400 mb-2">Admin Username Whitelist</label>
+                                    <input type="text" id="cfg-user" value="secadmin" oninput="generateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block font-mono uppercase tracking-wider text-slate-400 mb-2">SSH Listening Port</label>
+                                    <input type="number" id="cfg-port" value="22" oninput="generateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block font-mono uppercase tracking-wider text-slate-400 mb-2">Allowed Management IP (Workstation)</label>
+                                    <input type="text" id="cfg-ip" value="192.168.110.50" oninput="generateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label class="block font-mono uppercase tracking-wider text-slate-400 mb-2">Password Expiration (Days)</label>
+                                    <input type="number" id="cfg-aging" value="90" oninput="generateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white font-mono focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Compiled Output Code Panel -->
+                        <div class="lg:col-span-2 space-y-4">
+                            <div class="flex border-b border-slate-800 gap-1 overflow-x-auto">
+                                <button onclick="switchConfigTab('ssh')" id="btn-cfg-ssh" class="cfg-tab-btn px-4 py-2.5 border-b-2 border-emerald-400 text-white font-mono text-xs font-bold whitespace-nowrap">sshd_config</button>
+                                <button onclick="switchConfigTab('sysctl')" id="btn-cfg-sysctl" class="cfg-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 font-mono text-xs whitespace-nowrap">99-hardening.conf</button>
+                                <button onclick="switchConfigTab('fail2ban')" id="btn-cfg-fail2ban" class="cfg-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 font-mono text-xs whitespace-nowrap">jail.local</button>
+                                <button onclick="switchConfigTab('fstab')" id="btn-cfg-fstab" class="cfg-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 font-mono text-xs whitespace-nowrap">fstab</button>
+                            </div>
+
+                            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 relative">
+                                <button onclick="copyCurrentConfig()" class="absolute top-4 right-4 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-mono px-3 py-1.5 rounded-lg transition-all">Copy Parameters</button>
+                                <pre class="code-font text-emerald-400 text-xs overflow-x-auto h-96 select-all whitespace-pre leading-relaxed custom-scrollbar font-bold" id="config-code-view"># Config Loader Error</pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 5: TROUBLESHOOTING ================= -->
+                <section id="tab-troubleshooting" class="tab-content hidden space-y-8">
+                    <header class="border-b border-slate-800 pb-6">
+                        <h2 class="text-2xl font-black text-white tracking-tight">Production Troubleshooting Lab</h2>
+                        <p class="text-xs text-slate-400 mt-1">Simulated terminal outputs of the real-world connectivity, execution, pathing, and syntax errors resolved throughout execution.</p>
+                    </header>
+
+                    <!-- Interactive Diagnostic Sandbox -->
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        
+                        <!-- Problem Catalog Directory -->
+                        <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono mb-2">Diagnostic Directory</h3>
+                            
+                            <button onclick="loadTroubleshootCase(1, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/30 border border-emerald-500/20 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 01</span>
+                                <h4 class="text-white font-bold text-xs">VirtualBox NAT "Connection Refused"</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Host SSH connection failures when using default NAT configurations.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(2, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 02</span>
+                                <h4 class="text-white font-bold text-xs">Absolute SSH Root Denials</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Unexpected "Permission denied" responses when testing locked admin gateways.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(3, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 03</span>
+                                <h4 class="text-white font-bold text-xs">File System Path / Typos Errors</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Directory validation failures or path mistakes inside /etc/bash.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(4, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 04</span>
+                                <h4 class="text-white font-bold text-xs">Sudo Authorization Loop Failures</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Sudo privileges repeatedly rejecting valid administration credentials.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(5, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 05</span>
+                                <h4 class="text-white font-bold text-xs">Missing "AllowUsers" Directives</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">The absolute absence of Whitelisting inside native templates.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(6, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 06</span>
+                                <h4 class="text-white font-bold text-xs">rkhunter Mirror Signature Failures</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Baseline scanner updates returning unresolved HTTP mirror failures.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(7, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 07</span>
+                                <h4 class="text-white font-bold text-xs">Missing /var/log/auth.log</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Logging failures in modern Ubuntu releases.</p>
+                            </button>
+
+                            <button onclick="loadTroubleshootCase(8, this)" class="ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group">
+                                <span class="text-[10px] text-red-400 font-mono font-bold block uppercase mb-1">Issue 08</span>
+                                <h4 class="text-white font-bold text-xs">SCP Backup Transfers Denied</h4>
+                                <p class="text-slate-400 text-[11px] mt-1 line-clamp-2">Secure file copying failure due to strict root folder permissions.</p>
+                            </button>
+                        </div>
+
+                        <!-- Diagnostic Console View -->
+                        <div class="xl:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl flex flex-col justify-between overflow-hidden shadow-2xl min-h-[500px]">
+                            
+                            <!-- Tab Bar Header -->
+                            <div class="bg-slate-900/40 px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span class="text-xs font-mono text-slate-400 ml-4" id="ts-console-title">Diagnostic Console</span>
+                                </div>
+                                <span class="text-[10px] bg-slate-800 border border-slate-700 px-3 py-1 rounded-lg text-slate-400 font-mono font-bold">SIMULATOR_SANDBOX</span>
+                            </div>
+
+                            <!-- Interactive Output Body -->
+                            <div class="p-6 flex-1 space-y-6 font-mono text-xs overflow-y-auto">
+                                <div class="space-y-2">
+                                    <span class="text-slate-500 block"># Simulated Terminal Failure Output:</span>
+                                    <div class="bg-red-500/5 border border-red-500/10 p-4 rounded-xl text-red-400 whitespace-pre-wrap leading-relaxed" id="ts-simulated-error">Select an issue on the left to inspect simulated debug scenarios.</div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <span class="text-slate-500 block"># Strategic Remediation Steps:</span>
+                                    <div class="bg-emerald-500/5 border border-emerald-500/10 p-4 rounded-xl text-emerald-400 whitespace-pre-wrap leading-relaxed" id="ts-remediation-output">Strategic remediation instructions will output here.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= SECTION 6: COMPLIANCE AUDIT ================= -->
+                <section id="tab-audits" class="tab-content hidden space-y-8">
+                    <header class="border-b border-slate-800 pb-6">
+                        <h2 class="text-2xl font-black text-white tracking-tight">Compliance & Hardening Index Scorecard</h2>
+                        <p class="text-xs text-slate-400 mt-1">Audit local security configurations against standard baseline policies.</p>
+                    </header>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        
+                        <!-- List of Controls -->
+                        <div class="lg:col-span-2 space-y-3">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono mb-2">Hardening Requirements</h3>
+                            
+                            <div class="space-y-2 text-xs">
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">1. Administrative Privilege Segregation</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Default root accounts locked out (`passwd -l`) and restricted admin access verified via `secadmin`.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">2. Public Key Auths Enforced</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Disabled interactive password gateways inside `/etc/ssh/sshd_config`.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">3. Ingress Perimeter Shield Active</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">UFW enabled with default deny incoming policies enforced.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">4. Adaptive Intrusion Prevention Active</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Fail2ban services tracking SSH logins with dynamic IP drop structures.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">5. Automatic System Upgrades</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Daily automated security patches running via `unattended-upgrades`.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">6. Active Kernel sysctl Hardening</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Enforced Reverse Path Filtering and disabled local ICMP redirects.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">7. Shared Memory Location Lockdown</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Mounted `/dev/shm` dynamically with `noexec,nosuid,nodev` security parameters.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-4 p-4 bg-slate-900/20 border border-slate-800 hover:border-slate-700 rounded-2xl cursor-pointer transition-all">
+                                    <input type="checkbox" onchange="calculateScore()" class="audit-check mt-1 w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500">
+                                    <div>
+                                        <span class="text-white font-bold block">8. Audits & Malware Sweeps Instantiated</span>
+                                        <span class="text-slate-400 text-[11px] mt-0.5 block">Configured and initialized `auditd`, `rkhunter`, and `chkrootkit` scanning tools.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Score Panel -->
+                        <div class="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl h-fit space-y-6">
+                            <h3 class="text-sm font-bold text-white uppercase tracking-wider font-mono">Hardening Index</h3>
+                            
+                            <div class="text-center py-8 bg-slate-950/80 border border-slate-800 rounded-2xl relative overflow-hidden">
+                                <span class="text-6xl font-extrabold text-emerald-400 code-font block" id="calculated-score-val">0</span>
+                                <span class="text-[10px] text-slate-500 block uppercase font-mono tracking-wider mt-4">Calculated Index Score</span>
+                            </div>
+
+                            <div class="space-y-3 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 font-mono">Current Status:</span>
+                                    <span class="text-emerald-400 font-bold" id="calculated-status">Developing Baseline</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 font-mono">Assessed System:</span>
+                                    <span class="text-slate-300 font-bold">Ubuntu Server LTS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- Global Footer -->
+            <footer class="bg-slate-950 px-8 py-5 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] font-mono text-slate-500">
+                <span class="flex items-center gap-1.5">
+                    <span>Repository Workspace:</span>
+                    <a href="https://github.com/mahidulhq/linux-server-hardening-runbook" target="_blank" class="text-slate-300 hover:text-emerald-400 hover:underline">mahidulhq/linux-server-hardening-runbook ↗</a>
+                </span>
+                <span>Calculated dynamically in compliance with CIS standards & security policies.</span>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- UI TOAST FEEDBACK CONTAINER -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 pointer-events-none"></div>
+
+    <!-- Scripting Engine Logic -->
+    <script>
+        // --- Navigation Logic ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all text-slate-400 border border-transparent hover:bg-slate-900 hover:text-white";
+            });
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-semibold transition-all bg-emerald-600/10 text-emerald-400 border border-emerald-500/20";
+        }
+
+        // --- Config Engine Tab Navigation ---
+        let currentConfigView = 'ssh';
+        function switchConfigTab(viewId) {
+            currentConfigView = viewId;
+            document.querySelectorAll('.cfg-tab-btn').forEach(btn => {
+                btn.className = "cfg-tab-btn px-4 py-2.5 border-b-2 border-transparent text-slate-400 font-mono text-xs whitespace-nowrap";
+            });
+            const activeBtn = document.getElementById(`btn-cfg-${viewId}`);
+            activeBtn.className = "cfg-tab-btn px-4 py-2.5 border-b-2 border-emerald-400 text-white font-mono text-xs font-bold whitespace-nowrap";
+
+            generateConfigs();
+        }
+
+        // --- Clipboard Utility ---
+        function copyElementText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("Copied!", "Command template copied to workspace clipboard successfully.");
+        }
+
+        // --- Dynamic Config Generation ---
+        function generateConfigs() {
+            const user = document.getElementById('cfg-user').value || 'secadmin';
+            const port = document.getElementById('cfg-port').value || '22';
+            const ip = document.getElementById('cfg-ip').value || '192.168.110.50';
+            const aging = document.getElementById('cfg-aging').value || '90';
+
+            let output = '';
+
+            if (currentConfigView === 'ssh') {
+                output = `# Hardened /etc/ssh/sshd_config (Generated Baseline)
+Port ${port}
+Protocol 2
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no
+PubkeyAuthentication yes
+UsePAM yes
+X11Forwarding no
+AllowAgentForwarding no
+AllowTcpForwarding no
+PermitEmptyPasswords no
+MaxAuthTries 3
+ClientAliveInterval 300
+ClientAliveCountMax 2
+LoginGraceTime 30
+AllowUsers ${user}`;
+            } else if (currentConfigView === 'sysctl') {
+                output = `# Hardened Kernel Parameters /etc/sysctl.d/99-hardening.conf
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.conf.all.log_martians = 1`;
+            } else if (currentConfigView === 'fail2ban') {
+                output = `# Hardened Overrides /etc/fail2ban/jail.local
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 5
+backend = systemd
+
+[sshd]
+enabled = true
+port = ${port}
+logpath = %(sshd_log)s`;
+            } else if (currentConfigView === 'fstab') {
+                output = `# Secure Mount Point Overrides /etc/fstab
+tmpfs /dev/shm tmpfs defaults,noexec,nosuid,nodev 0 0`;
+            }
+
+            const targetElement = document.getElementById('config-code-view');
+            if (targetElement) {
+                targetElement.innerText = output;
+            }
+        }
+
+        function copyCurrentConfig() {
+            const targetElement = document.getElementById('config-code-view');
+            if (!targetElement) return;
+            const content = targetElement.innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = content;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            showToast("Copied!", "Target configuration file parameters copied safely.");
+        }
+
+        // --- Custom Beautiful Toast Notifications ---
+        function showToast(title, desc) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-2xl mb-3 pointer-events-auto transition-all duration-300 opacity-0 transform translate-y-4 max-w-sm";
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <span class="text-emerald-400 font-bold">✓</span>
+                    <div>
+                        <h4 class="text-white text-xs font-bold leading-none">${title}</h4>
+                        <p class="text-[10px] text-slate-400 mt-1">${desc}</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-y-4');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+
+        // --- Troubleshooting Lab Diagnostic Scenarios ---
+        const tsCases = {
+            1: {
+                title: "VirtualBox NAT Connection Failures (Issue 01)",
+                error: `$ ssh secadmin@10.0.#.##\nssh: connect to host 10.0.#.## port 22: Connection refused`,
+                remediation: `The Cause:\nVirtualBox isolates Guest interfaces behind a private NAT routing engine by default. Host terminals cannot bind connections directly without forwarding rules.\n\nRemediation Steps:\nOption A: Switch Network adapters to "Bridged" to bind guest IP addresses within the same subnet pool as your local Host machine.\nOption B: Setup Port Forwarding on the Virtual Box Settings (Advanced -> Port Forwarding):\nMap Host port 2222 -> Guest port 22 (or your custom SSH port). Connect via:\n\n$ ssh secadmin@127.0.0.1 -p 2222`
+            },
+            2: {
+                title: "SSH Root Permission Denials (Issue 02)",
+                error: `$ ssh root@192.168.##.##\nroot@192.168.##.##'s password:\nPermission denied, please try again.\nroot@192.168.##.##'s password:\nPermission denied (publickey, password).`,
+                remediation: `The Meaning:\nThis is a SUCCESS metrics indicator! The failure to connect confirms that your root administrative password locks and SSH configuration rules (PermitRootLogin no) are successfully functional.\n\nHow to acquire root commands from administration accounts:\n$ ssh secadmin@192.168.##.##\n\nOnce connected, use standard escalations:\n$ sudo -i`
+            },
+            3: {
+                title: "File System Path / Typos Errors (Issue 03)",
+                error: `$ sudo nano /etc/bash/sshd_config\n[Error writing /etc/bash/sshd_config: Directory non-existent]`,
+                remediation: `The Cause:\nA basic configuration error. The system SSH daemon's settings path resides within the administrative folder "/etc/ssh/", not "/etc/bash/".\n\nRemediation:\nCorrect the path string inside the terminal executing command:\n$ sudo nano /etc/ssh/sshd_config`
+            },
+            4: {
+                title: "Sudo Authorization Looping Failures (Issue 04)",
+                error: `$ sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak\n[sudo] password for secadmin:\nsudo: 3 incorrect password attempts`,
+                remediation: `The Explanation:\nExecuting "sudo" prompts the system for the active, non-root administrative account password ("secadmin") rather than the superuser root password itself.\n\nResolution:\nVerify credentials are entered carefully. If the local account password has been forgotten, restore VM state snapshots or boot into single-user modes to perform credential recoveries.`
+            },
+            5: {
+                title: "Missing 'AllowUsers' Directives (Issue 05)",
+                error: `# Searching files for AllowUsers...\n$ grep "AllowUsers" /etc/ssh/sshd_config\n$ (No output returned)`,
+                remediation: `The Explanation:\nThe AllowUsers restriction whitelist directive is absent by default. When unconfigured, any active local system user is permitted to request SSH access.\n\nRemediation:\nAppend the directive to the absolute end of /etc/ssh/sshd_config:\n$ sudo nano /etc/ssh/sshd_config\n\n# Paste on a new line:\nAllowUsers secadmin\n\n$ sudo sshd -t\n$ sudo systemctl reload ssh`
+            },
+            6: {
+                title: "rkhunter Database Mirror Signature Failures (Issue 06)",
+                error: `$ sudo rkhunter --update\n[+] Error: Download failed. Stale mirror configurations.`,
+                remediation: `The Explanation:\nThe default upstream remote database update files are occasionally unresponsive or restricted.\n\nResolution Steps:\nModify configurations to override download mirror dependencies:\nOpen /etc/rkhunter.conf and set:\nUPDATE_MIRRORS=1\nMIRRORS_MODE=0\n\nAlternatively, skip remote signature validations and generate the clean local database snapshot directly:\n$ sudo rkhunter --propupd`
+            },
+            7: {
+                title: "Missing /var/log/auth.log (Issue 07)",
+                error: `$ tail -f /var/log/auth.log\ntail: cannot open '/var/log/auth.log' for reading: No such file or directory`,
+                remediation: `The Explanation:\nModern Ubuntu releases (e.g. 24.04 and 26.04) log authentications directly to systemd-journald rather than storing clear text logs in standard directories.\n\nRemediation:\nMonitor real-time authentications via journalctl:\n$ sudo journalctl -f -u ssh`
+            },
+            8: {
+                title: "SCP Backup Transfers Denied (Issue 08)",
+                error: `$ scp secadmin@192.168.##.##:/root/hardening-backup-2026-07-16.tar.gz ./\nPermission denied (scp: /root/hardening-backup-2026-07-16.tar.gz: Permission denied)`,
+                remediation: `The Explanation:\nYour secadmin account lacks root permissions to read inside the /root/ path directly over remote scp.\n\nResolution:\nStage backup files inside temporary system locations, change ownership parameters, copy locally, and then clean up administrative directories.\n\nOn Server:\n$ sudo cp /root/hardening-backup-*.tar.gz /tmp/\n$ sudo chown secadmin:secadmin /tmp/hardening-backup-*.tar.gz\n\nOn Workstation Host:\n$ scp secadmin@192.168.##.##:/tmp/hardening-backup-*.tar.gz ./`
+            }
+        };
+
+        function loadTroubleshootCase(caseId, element) {
+            const data = tsCases[caseId];
+            document.getElementById('ts-console-title').innerText = `Diagnostic Console - ${data.title}`;
+            document.getElementById('ts-simulated-error').innerText = data.error;
+            document.getElementById('ts-remediation-output').innerText = data.remediation;
+
+            document.querySelectorAll('.ts-case-btn').forEach(btn => {
+                btn.className = "ts-case-btn w-full text-left p-4 bg-slate-900/10 border border-slate-800 hover:border-emerald-500/30 rounded-xl transition-all block group";
+            });
+
+            const targetElement = element || document.querySelector('.ts-case-btn');
+            if (targetElement) {
+                targetElement.className = "ts-case-btn w-full text-left p-4 bg-slate-900/30 border border-emerald-500/20 hover:border-emerald-500/30 rounded-xl transition-all block group";
+            }
+        }
+
+        // --- Scorecard Compliance Logic ---
+        function calculateScore() {
+            const checks = document.querySelectorAll('.audit-check');
+            let completed = 0;
+            checks.forEach(c => { if (c.checked) completed++; });
+
+            const percentage = Math.round((completed / checks.length) * 100);
+            
+            // Render Score Metrics
+            document.getElementById('calculated-score-val').innerText = `${percentage}%`;
+            document.getElementById('overall-progress-text').innerText = `${percentage}% Completed`;
+
+            // Progress Radial Ring Math
+            const circle = document.getElementById('progress-circle');
+            const radius = circle.r.baseVal.value;
+            const circumference = radius * 2 * Math.PI;
+            const offset = circumference - (percentage / 100) * circumference;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            circle.style.strokeDashoffset = offset;
+
+            // Status Badge Messaging
+            const statusEl = document.getElementById('calculated-status');
+            if (percentage < 30) {
+                statusEl.innerText = "Developing Baseline";
+                statusEl.className = "text-red-400 font-bold";
+            } else if (percentage < 70) {
+                statusEl.innerText = "Evaluating System Parameters";
+                statusEl.className = "text-amber-400 font-bold";
+            } else {
+                statusEl.innerText = "Hardened Environment Approved";
+                statusEl.className = "text-emerald-400 font-bold";
+            }
+        }
+
+        // --- Chart.js Data Visualizations ---
+        function initCharts() {
+            // Chart 1: Dynamic Attack Reduction Impact Mapping
+            const ctxImpact = document.getElementById('chart-impact').getContext('2d');
+            new Chart(ctxImpact, {
+                type: 'bar',
+                data: {
+                    labels: ['Brute Force Attempts', 'Scanning Discovery', 'LPE Exploits', 'MitM Redirects'],
+                    datasets: [
+                        {
+                            label: 'Default Installation (Vulnerability %)',
+                            data: [95, 88, 72, 65],
+                            backgroundColor: 'rgba(239, 68, 68, 0.4)',
+                            borderColor: 'rgb(239, 68, 68)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Hardened Baseline (Vulnerability %)',
+                            data: [5, 6, 12, 5],
+                            backgroundColor: 'rgba(16, 185, 129, 0.4)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: '#1e293b' },
+                            ticks: { color: '#64748b', callback: v => v + '%' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1', font: { family: 'Inter', size: 10 } } }
+                    }
+                }
+            });
+
+            // Chart 2: Controls Distribution Categories Doughnut
+            const ctxDistribution = document.getElementById('chart-distribution').getContext('2d');
+            new Chart(ctxDistribution, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Network', 'Auth & IAM', 'Kernel Parameters', 'File Audits'],
+                    datasets: [{
+                        data: [35, 25, 20, 20],
+                        backgroundColor: [
+                            '#10b981', // emerald
+                            '#3b82f6', // blue
+                            '#6366f1', // indigo
+                            '#f59e0b'  // amber
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#cbd5e1', boxWidth: 10, padding: 15, font: { family: 'Inter', size: 10 } } }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        window.onload = () => {
+            initCharts();
+            generateConfigs();
+            calculateScore();
+            // Load standard case safely
+            loadTroubleshootCase(1, null);
+        };
+    </script>
+</body>
+</html>
