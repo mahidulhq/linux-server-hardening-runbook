@@ -1,3 +1,7 @@
+```Note
+💡Notice: Documentation writing is still in process. Current Lynis score 66. I will try to make it 80+.
+```
+
 # Linux Server Hardening (Ubuntu)
 
 A practical, beginner-friendly project to harden an Ubuntu server using security best practices.
