@@ -141,3 +141,11 @@ sudo systemctl --failed
 
 ```
 ![ss](./img/systemctl.png)
+
+```bash
+# Verify hardening with scanners Lynis
+sudo lynis audit system
+```
+After trying second time I managed Hardening Index 72
+
+![ss](./img/second_attempt.png)
