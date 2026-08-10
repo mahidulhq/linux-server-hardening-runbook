@@ -1,6 +1,6 @@
 # Linux Server Hardening (Ubuntu)
 
-A practical, beginner-friendly project to harden an Ubuntu server using security best practices.
+A practical project to harden an Ubuntu server using security best practices.
 
 ---
 
